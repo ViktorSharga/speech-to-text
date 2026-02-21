@@ -1,8 +1,8 @@
-name: VoiceInk
+name: SpeechToText
 options:
-  bundleIdPrefix: com.viktorsarga
+  bundleIdPrefix: app.speechtotext
   deploymentTarget:
-    macOS: "14.0"
+    macOS: "26.0"
   xcodeVersion: "16.0"
   createIntermediateGroups: true
 
@@ -15,21 +15,22 @@ packages:
     from: "0.2.1"
 
 targets:
-  VoiceInk:
+  SpeechToText:
     type: application
     platform: macOS
     sources:
-      - VoiceInk
+      - SpeechToText
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.viktorsarga.VoiceInk
+        PRODUCT_BUNDLE_IDENTIFIER: app.speechtotext
+        PRODUCT_NAME: "Speech to Text"
         MARKETING_VERSION: "1.0.0"
         CURRENT_PROJECT_VERSION: "1"
-        INFOPLIST_FILE: VoiceInk/Resources/Info.plist
-        CODE_SIGN_ENTITLEMENTS: VoiceInk/Resources/VoiceInk.entitlements
+        INFOPLIST_FILE: SpeechToText/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: SpeechToText/Resources/SpeechToText.entitlements
         CODE_SIGN_IDENTITY: "-"
         SWIFT_VERSION: "5.9"
-        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        MACOSX_DEPLOYMENT_TARGET: "26.0"
         ENABLE_HARDENED_RUNTIME: true
     dependencies:
       - package: WhisperKit

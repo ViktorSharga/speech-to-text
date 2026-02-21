@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "VoiceInk",
+    name: "SpeechToText",
     platforms: [
         .macOS(.v14)
     ],
@@ -12,13 +12,13 @@ let package = Package(
     ],
     targets: [
         .executableTarget(
-            name: "VoiceInk",
+            name: "SpeechToText",
             dependencies: [
                 "WhisperKit",
                 "HotKey",
             ],
-            path: "VoiceInk",
-            exclude: ["Resources/Info.plist", "Resources/VoiceInk.entitlements"]
+            path: "SpeechToText",
+            exclude: ["Resources/Info.plist", "Resources/SpeechToText.entitlements", "Resources/Assets.xcassets"]
         ),
     ]
 )
