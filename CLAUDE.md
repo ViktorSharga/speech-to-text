@@ -74,4 +74,19 @@ IDLE ──→ RECORDING ──→ TRANSCRIBING ──→ RESULT ──→ IDLE
 - [x] Phase 5: Transcription protocol + WhisperKit backend
 - [x] Phase 6: OpenAI API backend
 - [x] Phase 7: Language selector + Settings
-- [ ] Phase 8: Polish — keyboard shortcuts, error handling, icons
+- [x] Phase 8: Polish — keyboard shortcuts, error handling, icons
+
+## Keyboard Shortcuts
+| Key | Context | Action |
+|-----|---------|--------|
+| F5 | Global | Toggle recording / dismiss result |
+| Return | Recording | Stop recording |
+| Escape | Any panel state | Dismiss panel |
+| Cmd+C | Result | Copy text |
+| Cmd+Return | Result | Copy & close |
+
+## Known Gotchas
+- **iCloud xattrs**: Build to `/tmp/VoiceInk-build`, not inside `~/Documents`
+- **F5 conflict**: User must disable system Dictation shortcut (System Settings → Keyboard → Dictation)
+- **WhisperKit model download**: First launch downloads ~150MB (base model) — shows "Loading model..." in menu bar
+- **16GB Mac**: Stick to `base` or `small` models; `large-v3` uses ~3GB RAM

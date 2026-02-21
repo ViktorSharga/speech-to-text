@@ -18,16 +18,38 @@ struct RecordingView: View {
             }
 
             if let error = appState.errorMessage {
-                Text(error)
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                        .font(.caption)
+                    Text(error)
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .multilineTextAlignment(.leading)
+                }
+                .padding(.horizontal)
+
+                Button("Dismiss") {
+                    appState.dismiss()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
             }
         }
         .padding()
         .frame(minWidth: 320, maxWidth: 320, minHeight: 200)
         .background(.ultraThinMaterial)
+        .onKeyPress(.escape) {
+            appState.dismiss()
+            return .handled
+        }
+        .onKeyPress(.return) {
+            if appState.currentState == .recording {
+                appState.toggleRecording()
+                return .handled
+            }
+            return .ignored
+        }
     }
 
     private var idleView: some View {
@@ -51,7 +73,7 @@ struct RecordingView: View {
             LanguageSelector()
                 .environmentObject(appState)
 
-            Text("Press F5 to stop")
+            Text("Press F5 or Return to stop")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -63,6 +85,7 @@ struct RecordingView: View {
                 .controlSize(.large)
             Text("Transcribing...")
                 .font(.headline)
+                .foregroundColor(.secondary)
         }
     }
 }

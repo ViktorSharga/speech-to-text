@@ -16,18 +16,29 @@ struct TranscriptionResultView: View {
                 )
                 .frame(minHeight: 80, maxHeight: 150)
 
-            HStack {
+            HStack(spacing: 8) {
                 Button {
                     appState.copyToClipboard()
-                    copied = true
+                    withAnimation {
+                        copied = true
+                    }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        copied = false
+                        withAnimation {
+                            copied = false
+                        }
                     }
                 } label: {
                     Label(copied ? "Copied!" : "Copy",
                           systemImage: copied ? "checkmark" : "doc.on.doc")
                 }
                 .keyboardShortcut("c", modifiers: .command)
+
+                Button {
+                    appState.copyAndDismiss()
+                } label: {
+                    Label("Copy & Close", systemImage: "doc.on.doc.fill")
+                }
+                .keyboardShortcut(.return, modifiers: .command)
 
                 Spacer()
 
@@ -36,6 +47,7 @@ struct TranscriptionResultView: View {
                 }
                 .keyboardShortcut(.escape, modifiers: [])
             }
+            .controlSize(.small)
         }
     }
 }

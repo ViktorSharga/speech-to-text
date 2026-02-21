@@ -39,25 +39,39 @@ class AppState: ObservableObject {
     @Published var audioLevel: Float = 0.0
     @Published var transcribedText: String = ""
     @Published var errorMessage: String?
+    @Published var isPreparingModel: Bool = false
 
     @AppStorage("selectedLanguage") var selectedLanguage: LanguageMode = .auto
     @AppStorage("selectedBackend") var selectedBackendRaw: String = TranscriptionBackend.local.rawValue
 
     var selectedBackend: TranscriptionBackend {
         get { TranscriptionBackend(rawValue: selectedBackendRaw) ?? .local }
-        set { selectedBackendRaw = newValue.rawValue }
+        set {
+            selectedBackendRaw = newValue.rawValue
+            objectWillChange.send()
+        }
     }
 
     private var audioRecorder: AudioRecorder?
     private var hotkeyManager: HotkeyManager?
     private var transcriptionService: (any TranscriptionService)?
     private var panelController: FloatingPanelController?
+    private var levelCancellable: AnyCancellable?
 
-    func setup() {
+    init() {
+        // Defer setup to avoid issues during SwiftUI initialization
+        DispatchQueue.main.async { [weak self] in
+            self?.setup()
+        }
+    }
+
+    private func setup() {
         audioRecorder = AudioRecorder()
-        audioRecorder?.levelPublisher
+        levelCancellable = audioRecorder?.levelPublisher
             .receive(on: DispatchQueue.main)
-            .assign(to: &$audioLevel)
+            .sink { [weak self] level in
+                self?.audioLevel = level
+            }
 
         hotkeyManager = HotkeyManager { [weak self] in
             Task { @MainActor in
@@ -71,11 +85,17 @@ class AppState: ObservableObject {
 
     func updateTranscriptionService() {
         transcriptionService = TranscriptionServiceFactory.create(selectedBackend)
+        isPreparingModel = true
         Task {
             do {
                 try await transcriptionService?.prepare()
+                isPreparingModel = false
             } catch {
-                errorMessage = "Failed to prepare transcription: \(error.localizedDescription)"
+                isPreparingModel = false
+                // Don't show API key errors at startup for OpenAI — user will configure later
+                if selectedBackend == .local {
+                    errorMessage = "Failed to prepare model: \(error.localizedDescription)"
+                }
             }
         }
     }
@@ -101,6 +121,7 @@ class AppState: ObservableObject {
                         self?.startRecording()
                     } else {
                         self?.errorMessage = "Microphone access denied. Enable in System Settings → Privacy → Microphone."
+                        self?.panelController?.show()
                     }
                 }
             }
@@ -123,15 +144,8 @@ class AppState: ObservableObject {
     private func stopRecording() {
         currentState = .transcribing
 
-        guard let audioData = audioRecorder?.stopRecording() else {
-            errorMessage = "No audio data captured"
-            currentState = .idle
-            panelController?.hide()
-            return
-        }
-
-        guard !audioData.isEmpty else {
-            errorMessage = "Recording was empty"
+        guard let audioData = audioRecorder?.stopRecording(), !audioData.isEmpty else {
+            errorMessage = "No audio captured. Make sure your microphone is working."
             currentState = .idle
             panelController?.hide()
             return
@@ -146,8 +160,17 @@ class AppState: ObservableObject {
                     audioData: audioData,
                     language: selectedLanguage.whisperCode
                 )
-                transcribedText = text
-                currentState = .result(text)
+
+                let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+                guard !trimmed.isEmpty else {
+                    errorMessage = "No speech detected. Try speaking louder or closer to the mic."
+                    currentState = .idle
+                    panelController?.hide()
+                    return
+                }
+
+                transcribedText = trimmed
+                currentState = .result(trimmed)
             } catch {
                 errorMessage = "Transcription failed: \(error.localizedDescription)"
                 currentState = .idle
@@ -166,5 +189,11 @@ class AppState: ObservableObject {
     func copyToClipboard() {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(transcribedText, forType: .string)
+    }
+
+    /// Copy text and dismiss panel in one action
+    func copyAndDismiss() {
+        copyToClipboard()
+        dismiss()
     }
 }

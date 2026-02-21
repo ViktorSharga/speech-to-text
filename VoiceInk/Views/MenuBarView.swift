@@ -2,9 +2,10 @@ import SwiftUI
 
 struct MenuBarView: View {
     @EnvironmentObject var appState: AppState
+    let openSettings: OpenSettingsAction
 
     var body: some View {
-        VStack {
+        Group {
             switch appState.currentState {
             case .idle:
                 Button("Start Recording (F5)") {
@@ -18,16 +19,21 @@ struct MenuBarView: View {
                 Text("Transcribing...")
                     .foregroundColor(.secondary)
             case .result:
-                Button("Show Result") {
-                    // Panel should already be visible
+                Button("Dismiss Result (F5)") {
+                    appState.dismiss()
                 }
-                .disabled(true)
+            }
+
+            if appState.isPreparingModel {
+                Text("Loading model...")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
 
             Divider()
 
             Button("Settings...") {
-                NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+                openSettings()
             }
             .keyboardShortcut(",", modifiers: .command)
 
