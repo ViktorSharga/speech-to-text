@@ -58,14 +58,7 @@ class AppState: ObservableObject {
     private var panelController: FloatingPanelController?
     private var levelCancellable: AnyCancellable?
 
-    init() {
-        // Defer setup to avoid issues during SwiftUI initialization
-        DispatchQueue.main.async { [weak self] in
-            self?.setup()
-        }
-    }
-
-    private func setup() {
+    func setup() {
         audioRecorder = AudioRecorder()
         levelCancellable = audioRecorder?.levelPublisher
             .receive(on: DispatchQueue.main)

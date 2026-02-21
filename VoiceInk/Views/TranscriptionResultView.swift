@@ -31,21 +31,23 @@ struct TranscriptionResultView: View {
                     Label(copied ? "Copied!" : "Copy",
                           systemImage: copied ? "checkmark" : "doc.on.doc")
                 }
-                .keyboardShortcut("c", modifiers: .command)
+                .buttonStyle(.bordered)
 
                 Button {
                     appState.copyAndDismiss()
                 } label: {
                     Label("Copy & Close", systemImage: "doc.on.doc.fill")
                 }
-                .keyboardShortcut(.return, modifiers: .command)
+                .buttonStyle(.borderedProminent)
 
                 Spacer()
 
-                Button("Dismiss") {
+                Button {
                     appState.dismiss()
+                } label: {
+                    Image(systemName: "xmark")
                 }
-                .keyboardShortcut(.escape, modifiers: [])
+                .buttonStyle(.bordered)
             }
             .controlSize(.small)
         }

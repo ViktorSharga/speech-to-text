@@ -2,28 +2,23 @@ import SwiftUI
 
 @main
 struct VoiceInkApp: App {
-    @StateObject private var appState = AppState()
-    @Environment(\.openSettings) private var openSettings
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        MenuBarExtra {
-            MenuBarView(openSettings: openSettings)
-                .environmentObject(appState)
-        } label: {
-            Image(systemName: menuBarIcon)
-        }
-
         Settings {
             SettingsView()
-                .environmentObject(appState)
+                .environmentObject(appDelegate.appState)
         }
     }
+}
 
-    private var menuBarIcon: String {
-        switch appState.currentState {
-        case .recording: return "mic.fill"
-        case .transcribing: return "ellipsis.circle"
-        default: return "mic"
-        }
+@MainActor
+class AppDelegate: NSObject, NSApplicationDelegate {
+    let appState = AppState()
+    private var statusBarController: StatusBarController?
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        appState.setup()
+        statusBarController = StatusBarController(appState: appState)
     }
 }

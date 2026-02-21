@@ -39,17 +39,6 @@ struct RecordingView: View {
         .padding()
         .frame(minWidth: 320, maxWidth: 320, minHeight: 200)
         .background(.ultraThinMaterial)
-        .onKeyPress(.escape) {
-            appState.dismiss()
-            return .handled
-        }
-        .onKeyPress(.return) {
-            if appState.currentState == .recording {
-                appState.toggleRecording()
-                return .handled
-            }
-            return .ignored
-        }
     }
 
     private var idleView: some View {
@@ -57,7 +46,7 @@ struct RecordingView: View {
             Image(systemName: "mic")
                 .font(.system(size: 40))
                 .foregroundColor(.secondary)
-            Text("Press F5 to start recording")
+            Text("Click the mic icon to start")
                 .font(.headline)
                 .foregroundColor(.secondary)
         }
@@ -73,9 +62,24 @@ struct RecordingView: View {
             LanguageSelector()
                 .environmentObject(appState)
 
-            Text("Press F5 or Return to stop")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            HStack(spacing: 12) {
+                Button {
+                    appState.toggleRecording()
+                } label: {
+                    Label("Stop", systemImage: "stop.fill")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .controlSize(.regular)
+
+                Button {
+                    appState.dismiss()
+                } label: {
+                    Label("Cancel", systemImage: "xmark")
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.regular)
+            }
         }
     }
 
