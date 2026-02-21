@@ -1,0 +1,9 @@
+.build
+/tmp/VoiceInk-build
+*.xcuserstate
+xcuserdata/
+DerivedData/
+.DS_Store
+Package.resolved
+.swiftpm/
+*.xcodeproj/
