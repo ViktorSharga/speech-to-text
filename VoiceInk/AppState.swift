@@ -58,7 +58,14 @@ class AppState: ObservableObject {
     private var panelController: FloatingPanelController?
     private var levelCancellable: AnyCancellable?
 
-    func setup() {
+    init() {
+        // Defer setup to avoid issues during SwiftUI initialization
+        DispatchQueue.main.async { [weak self] in
+            self?.setup()
+        }
+    }
+
+    private func setup() {
         audioRecorder = AudioRecorder()
         levelCancellable = audioRecorder?.levelPublisher
             .receive(on: DispatchQueue.main)
@@ -85,7 +92,6 @@ class AppState: ObservableObject {
                 isPreparingModel = false
             } catch {
                 isPreparingModel = false
-                // Don't show API key errors at startup for OpenAI — user will configure later
                 if selectedBackend == .local {
                     errorMessage = "Failed to prepare model: \(error.localizedDescription)"
                 }
@@ -184,7 +190,6 @@ class AppState: ObservableObject {
         NSPasteboard.general.setString(transcribedText, forType: .string)
     }
 
-    /// Copy text and dismiss panel in one action
     func copyAndDismiss() {
         copyToClipboard()
         dismiss()
