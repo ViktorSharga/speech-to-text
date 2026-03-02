@@ -54,6 +54,11 @@ class AudioRecorder: ObservableObject {
             throw AudioRecorderError.formatConversionFailed
         }
 
+        // Remove any existing tap left over from a cancelled recording or
+        // a previous engine.start() failure — AVAudioEngine only allows one
+        // tap per bus and will crash (NSException) if a second is installed.
+        inputNode.removeTap(onBus: 0)
+
         let bufferSize: AVAudioFrameCount = 4096
         inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: inputFormat) { [weak self] buffer, _ in
             guard let self else { return }
@@ -87,6 +92,7 @@ class AudioRecorder: ObservableObject {
         do {
             try engine.start()
         } catch {
+            inputNode.removeTap(onBus: 0)
             throw AudioRecorderError.engineStartFailed(error)
         }
     }

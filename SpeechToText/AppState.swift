@@ -1,5 +1,6 @@
 import SwiftUI
 import Combine
+import HotKey
 
 enum AppStateValue: Equatable {
     case idle
@@ -43,6 +44,7 @@ class AppState: ObservableObject {
     @AppStorage("selectedLanguage") var selectedLanguage: LanguageMode = .ukrainian
     @AppStorage("correctionModel") var correctionModel: String = Constants.Defaults.defaultCorrectionModel
     @AppStorage("selectedBackend") var selectedBackendRaw: String = TranscriptionBackend.local.rawValue
+    @AppStorage("typingMode") var typingMode: Bool = false
 
     var selectedBackend: TranscriptionBackend {
         get { TranscriptionBackend(rawValue: selectedBackendRaw) ?? .local }
@@ -58,6 +60,9 @@ class AppState: ObservableObject {
     private var panelController: FloatingPanelController?
     private var levelCancellable: AnyCancellable?
     private var correctionService = TextCorrectionService()
+    private var enterHotKey: HotKey?
+    private var numpadEnterHotKey: HotKey?
+    private var escapeHotKey: HotKey?
 
     init() {
         // Defer setup to avoid issues during SwiftUI initialization
@@ -130,6 +135,7 @@ class AppState: ObservableObject {
 
         errorMessage = nil
         currentState = .recording
+        installRecordingHotKeys()
         panelController?.show()
 
         do {
@@ -137,17 +143,18 @@ class AppState: ObservableObject {
         } catch {
             errorMessage = "Failed to start recording: \(error.localizedDescription)"
             currentState = .idle
+            removeRecordingHotKeys()
             panelController?.hide()
         }
     }
 
     private func stopRecording() {
+        removeRecordingHotKeys()
         currentState = .transcribing
 
         guard let audioData = audioRecorder?.stopRecording(), !audioData.isEmpty else {
             errorMessage = "No audio captured. Make sure your microphone is working."
             currentState = .idle
-            panelController?.hide()
             return
         }
 
@@ -165,25 +172,55 @@ class AppState: ObservableObject {
                 guard !trimmed.isEmpty else {
                     errorMessage = "No speech detected. Try speaking louder or closer to the mic."
                     currentState = .idle
-                    panelController?.hide()
                     return
                 }
 
                 transcribedText = trimmed
-                currentState = .result(trimmed)
+
+                if self.typingMode {
+                    self.copyToClipboard()
+                    self.dismiss()
+                } else {
+                    currentState = .result(trimmed)
+                }
             } catch {
                 errorMessage = "Transcription failed: \(error.localizedDescription)"
                 currentState = .idle
-                panelController?.hide()
             }
         }
     }
 
     func dismiss() {
+        if case .recording = currentState {
+            _ = audioRecorder?.stopRecording()
+        }
+        removeRecordingHotKeys()
         currentState = .idle
         transcribedText = ""
         errorMessage = nil
         panelController?.hide()
+    }
+
+    private func installRecordingHotKeys() {
+        guard enterHotKey == nil else { return }
+        enterHotKey = HotKey(key: .return, modifiers: [])
+        enterHotKey?.keyDownHandler = { [weak self] in
+            Task { @MainActor in self?.toggleRecording() }
+        }
+        numpadEnterHotKey = HotKey(key: .keypadEnter, modifiers: [])
+        numpadEnterHotKey?.keyDownHandler = { [weak self] in
+            Task { @MainActor in self?.toggleRecording() }
+        }
+        escapeHotKey = HotKey(key: .escape, modifiers: [])
+        escapeHotKey?.keyDownHandler = { [weak self] in
+            Task { @MainActor in self?.dismiss() }
+        }
+    }
+
+    private func removeRecordingHotKeys() {
+        enterHotKey = nil
+        numpadEnterHotKey = nil
+        escapeHotKey = nil
     }
 
     func copyToClipboard() {

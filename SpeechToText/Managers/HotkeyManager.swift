@@ -11,7 +11,7 @@ class HotkeyManager {
     }
 
     private func registerHotkey() {
-        hotKey = HotKey(key: .f5, modifiers: [])
+        hotKey = HotKey(key: .r, modifiers: [.command])
         hotKey?.keyDownHandler = { [weak self] in
             self?.action()
         }

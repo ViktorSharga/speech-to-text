@@ -8,18 +8,18 @@ struct MenuBarView: View {
         Group {
             switch appState.currentState {
             case .idle:
-                Button("Start Recording (F5)") {
+                Button("Start Recording (⌘R)") {
                     appState.toggleRecording()
                 }
             case .recording:
-                Button("Stop Recording (F5)") {
+                Button("Stop Recording (⌘R)") {
                     appState.toggleRecording()
                 }
             case .transcribing:
                 Text("Transcribing...")
                     .foregroundColor(.secondary)
             case .result:
-                Button("Dismiss Result (F5)") {
+                Button("Dismiss Result (⌘R)") {
                     appState.dismiss()
                 }
             }

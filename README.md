@@ -8,10 +8,11 @@ A native macOS menu bar app for speech-to-text transcription with optional LLM-p
 
 ## Features
 
-- Global hotkey (F5) to start/stop recording from anywhere
+- Global hotkey (⌘R) to start/stop recording from anywhere
 - Floating, non-activating panel that never steals focus
 - Two transcription backends: local (WhisperKit) or cloud (OpenAI Whisper API)
 - LLM text correction via OpenRouter with Casual and Formal modes
+- Typing Mode: auto-copy transcription to clipboard and dismiss (enable in Settings)
 - Language-aware prompts (English and Ukrainian) that preserve code-switching, slang, and technical terms
 - macOS Liquid Glass UI
 
@@ -51,7 +52,7 @@ swift scripts/generate-icon.swift
 
 | Key | Context | Action |
 |-----|---------|--------|
-| F5 | Global | Toggle recording / dismiss result |
+| ⌘R | Global | Toggle recording / dismiss result |
 | Return | Recording | Stop recording |
 | Escape | Any state | Dismiss panel |
 | Cmd+C | Result | Copy text |
@@ -60,8 +61,6 @@ swift scripts/generate-icon.swift
 **Correction modes** (buttons appear in result view):
 - **Casual**: Fixes transcription errors only, minimal punctuation
 - **Formal**: Fixes errors + improves grammar and punctuation
-
-**Note**: Disable the system Dictation shortcut (System Settings > Keyboard > Dictation) to avoid F5 conflicts.
 
 ## License
 

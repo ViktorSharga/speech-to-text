@@ -47,14 +47,20 @@ struct SettingsView: View {
             }
 
             Section {
-                Text("Press F5 to start/stop recording")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                Text("Make sure to disable system Dictation shortcut in System Settings → Keyboard if it conflicts with F5.")
+                Text("Press ⌘R (Cmd+R) to start/stop recording")
                     .font(.caption)
                     .foregroundColor(.secondary)
             } header: {
                 Text("Hotkey")
+            }
+
+            Section {
+                Toggle("Typing Mode", isOn: $appState.typingMode)
+                Text("Copy transcription to clipboard and dismiss. Text correction is skipped.")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } header: {
+                Text("Auto-Paste")
             }
         }
         .formStyle(.grouped)

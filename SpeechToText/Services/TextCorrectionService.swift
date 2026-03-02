@@ -40,6 +40,7 @@ class TextCorrectionService {
             "model": model,
             "temperature": 0,
             "stop": ["</corrected>"],
+            "plugins": [[String: Any]](),
             "messages": [
                 ["role": "system", "content": systemPrompt],
                 ["role": "user", "content": "<transcription>\n\(text)\n</transcription>"],
